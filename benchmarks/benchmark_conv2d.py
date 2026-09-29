@@ -149,9 +149,9 @@ def print_results(results):
         f"{'Case':<16}"
         f"{'Baseline (ms)':>15}"
         f"{'CUTLASS E2E':>15}"
-        f"{'Planar':>12}"
+        f"{'Fast Path':>12}"
         f"{'E2E x':>10}"
-        f"{'Planar x':>11}"
+        f"{'Fast x':>11}"
         f"{'Max err':>13}"
     )
 
@@ -175,7 +175,7 @@ def print_results(results):
 
     print()
     print(f"Average E2E speedup   : {avg_e2e:.3f}x")
-    print(f"Average planar speedup: {avg_planar:.3f}x")
+    print(f"Average fast-path speedup: {avg_planar:.3f}x")
 
 
 def main():
