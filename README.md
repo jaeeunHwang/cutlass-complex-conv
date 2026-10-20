@@ -4,17 +4,16 @@ A PyTorch CUDA extension for complex-valued 2D convolution built on top of NVIDI
 
 This repository implements a unified implicit-CGEMM execution workflow for complex-valued convolution. Instead of decomposing a complex convolution into four independent real-valued `Conv2d` calls and reconstructing the result afterward, the CUDA kernel jointly processes the real and imaginary components inside a single implicit GEMM workflow.
 
-The implementation is based on the method described in:
+---
 
-> **Restructuring the Implicit GEMM Workflow for Complex-Valued Convolution**  
-> IEEE Access, 2026
+## 🚀 Performance
 
-***
+### Repository benchmark environment
 
-## Performance
-
-Benchmarks were measured on an **NVIDIA L4** with **PyTorch 2.11.0 + CUDA 12.8**.
+Benchmarks were measured on **Google Colab** using an **NVIDIA L4 (Ada, SM89)** with **PyTorch 2.11.0 + CUDA 12.8** and **CUTLASS 4.2.1**.  
 All benchmark cases use batch size 1, a 3×3 kernel, stride 1, and padding 1.
+
+The extension has also been built and validated on an **NVIDIA A100-SXM4-40GB (Ampere, SM80)** with **PyTorch 2.11.0 + CUDA 12.8**.
 
 | Cin → Cout, H×W | PyTorch Baseline (ms) | CUTLASS E2E (ms) | Fast Path (ms) | E2E Speedup | Fast-path Speedup |
 |---|---:|---:|---:|---:|---:|
@@ -27,23 +26,38 @@ All benchmark cases use batch size 1, a 3×3 kernel, stride 1, and padding 1.
 **Average end-to-end speedup: 3.55×**  
 **Average planar fast-path speedup: 17.65×**
 
-The PyTorch baseline uses four real-valued `Conv2d` operations followed by complex output reconstruction.
+<details>
+<summary><strong>Benchmark interpretation</strong></summary>
 
-`CUTLASS E2E` includes the standard `torch.complex64` NCHW interface, including planar layout conversion and output reconstruction.
+- The PyTorch baseline uses four real-valued `Conv2d` operations followed by complex output reconstruction.
+- `CUTLASS E2E` includes the standard `torch.complex64` NCHW interface, including planar layout conversion and output reconstruction.
+- `Fast Path` measures `forward_planar()` with real and imaginary NHWC inputs already prepared. It therefore excludes complex-to-planar layout/materialization overhead and should be interpreted separately from end-to-end performance.
 
-`Fast Path` measures `forward_planar()` with real and imaginary NHWC inputs already prepared, so it excludes complex-to-planar layout/materialization overhead and should be interpreted separately from end-to-end performance.
+</details>
 
-These repository benchmarks use a different environment and measurement setup from the paper experiments.
+### Paper experimental environment
+
+The paper experiments were performed under a separate fixed single-GPU hardware and software environment:
+
+- CPU: AMD Ryzen Threadripper PRO 3995WX
+- GPU: NVIDIA GeForce RTX 4070 (12 GB GDDR6X)
+- GPU architecture: NVIDIA Ada Lovelace
+- NVIDIA driver: 555.42.02
+- CUDA: 12.4
+- GPU configuration: single GPU
+- Kernel library: NVIDIA CUTLASS
+
+> **Note:** The repository benchmarks and the paper experiments use different hardware, software environments, and measurement scopes. Repository benchmark results should therefore be treated as reference measurements rather than exact reproductions of the paper results.
 
 ---
 
-## Installation
+## 📦 Installation
 
 ### Requirements
 
 - CUDA-enabled PyTorch
 - NVIDIA CUDA Toolkit with `nvcc`
-- A CUDA-capable NVIDIA GPU
+- A CUDA-capable NVIDIA GPU (**tested on NVIDIA A100 and L4**)
 
 Clone the repository with the CUTLASS submodule:
 
@@ -68,7 +82,7 @@ The CUDA extension is compiled during installation.
 
 ---
 
-## Usage
+## 🧪 Usage
 
 ```python
 import torch
@@ -109,11 +123,11 @@ Correctness is validated against a PyTorch reference implementation based on fou
 
 ---
 
-## Limitations
+## ⚠️ Limitations
 
 The current implementation is an inference-focused research prototype.
 
-Supported:
+### Supported
 
 - CUDA
 - `torch.complex64`
@@ -123,7 +137,8 @@ Supported:
 - `dilation=1`
 - `padding_mode="zeros"`
 
-Not currently supported:
+<details>
+<summary><strong>Not currently supported</strong></summary>
 
 - autograd / backward
 - complex bias
@@ -133,11 +148,13 @@ Not currently supported:
 - `complex128`
 - FP16/BF16 complex paths
 
-The CUDA kernel currently uses a fixed Tensor Core configuration and is not expected to be optimal for every convolution shape.
+</details>
+
+The CUDA kernel is implemented using the CUTLASS `cutlass::arch::Sm80` architecture tag. It currently uses a fixed Tensor Core configuration and is not expected to be optimal for every convolution shape.
 
 ---
 
-## Citation
+## 📚 Citation
 
 If you use this implementation in academic work, please cite:
 
