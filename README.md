@@ -4,12 +4,6 @@ A PyTorch CUDA extension for complex-valued 2D convolution built on top of NVIDI
 
 This repository implements a unified implicit-CGEMM execution workflow for complex-valued convolution. Instead of decomposing a complex convolution into four independent real-valued `Conv2d` calls and reconstructing the result afterward, the CUDA kernel jointly processes the real and imaginary components inside a single implicit GEMM workflow.
 
-The implementation is based on the method described in:
-
-> **Restructuring the Implicit GEMM Workflow for Complex-Valued Convolution**  
-> IEEE Access, 2026  
-> [Paper (IEEE Xplore)](https://doi.org/10.1109/ACCESS.2026.3685268)
-
 ---
 
 ## 🚀 Performance
@@ -162,7 +156,7 @@ The CUDA kernel is implemented using the CUTLASS `cutlass::arch::Sm80` architect
 
 ## 📚 Citation
 
-If you use this implementation in academic work, please cite:
+If you use this implementation in academic work, please cite our [paper](https://doi.org/10.1109/ACCESS.2026.3685268):
 
 ```bibtex
 @article{hwang2026restructuring,
